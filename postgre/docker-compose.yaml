@@ -1,0 +1,97 @@
+#masuk ke container postgresql "docker exec -it semantic_postgres bash"
+#masuk ke postgresql "psql -U postgres -d db_postgre"
+#enable extensi pgvector "CREATE EXTENSION vector;"
+#cek postgresql "\dx"
+#indexing column vector untuk optimasi
+# CREATE INDEX barangs_embedding_hnsw_idx
+# ON barangs
+# USING hnsw (embedding vector_cosine_ops);
+# gunakan untuk quit "\q"
+
+# buat collection baru di qdrant bisa lewat postman atau bisa lewat gui qdrant
+# PUT http://localhost:6333/collections/barangs
+# {
+#   "vectors": {
+#     "size": 768,
+#     "distance": "Cosine"
+#   }
+# }
+
+#cara login ke pgadmin postgre
+# di bagian sidebar sebelah kanan klik kanan pada Servers lalu klik register
+# setelah itu klik Server... dan isi nama Servernya bebas contoh PostgreSQL Local
+# setelah itu pindah pada bagian connection dan isi seperti ini
+# Host: postgres
+# Port: 5432
+# Maintenance DB: postgres
+# Username: postgres
+# Password: secret
+# sekarang bakal muncul databasenya
+# Databases
+#  └── db_postgre
+#       └── Schemas
+#            └── public
+#                 └── Tables
+# cara lihat isi table 
+# Klik kanan pada tabel di pilih lalu pilih menur View/Edit Data → All Rows
+
+#jika saat compose build selalu error coba seperti ini "docker pull nama_image" contoh "docker pull qdrant/qdrant"
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: laravel
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/var/www
+      - .:/app
+    working_dir: /var/www
+    depends_on:
+      - postgres
+      - qdrant
+
+  postgres:
+    # image: postgres:16
+    image: pgvector/pgvector:pg16
+    container_name: semantic_postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: db_postgre
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      
+  # gui postgre "http://localhost:5050"
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  # gui qdrant http://localhost:6333/dashboard
+  qdrant:
+    image: qdrant/qdrant
+    container_name: qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+volumes:
+  postgres_data:
+  qdrant_data:
+  pgadmin_data:
