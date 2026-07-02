@@ -1,0 +1,26 @@
+use_default_settings: true
+# Artinya:
+# pakai config bawaan SearXNG juga
+# Lalu file ini hanya override sebagian.
+
+general:
+  instance_name: "Kwanza Search"
+
+server:
+  secret_key: "kwanza_ai"
+  limiter: false
+
+search:
+  safe_search: 0
+  autocomplete: "google"
+  formats:
+    - html
+    - json #tambahkan format contoh penggunaan http://localhost:8085/search?q=bitcoin&format=json
+
+ui:
+  static_use_hash: true
+
+enabled_plugins:
+  - "Hash plugin"
+  - "Self Information"
+  - "Tracker URL remover"

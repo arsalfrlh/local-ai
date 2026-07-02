@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  searxng:
+    image: searxng/searxng:latest
+    container_name: searxng
+    ports:
+      - "8085:8080"
+      #listen port | internal Searxng listen di port 8080
+      # Windows localhost:8085
+      # ↓
+      # Container port 8080
+    volumes:
+      - ./setting:/etc/searxng
+      # Artinya folder lokal:
+      # ./setting
+      # di-mount ke container:
+      # /etc/searxng
+      # Windows folder → Container folder
+    environment:
+      - BASE_URL=http://localhost:8085/
+      - INSTANCE_NAME=Kwanza Search
+    restart: unless-stopped
+    # Artinya container auto restart kalau: crash, Docker restart, Windows reboot
+    # restart: no
+    # restart: always
+    # restart: on-failure
